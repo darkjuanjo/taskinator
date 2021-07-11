@@ -33,7 +33,7 @@ var taskFormHandler =  function(event) {
 
   createTaskEl(taskDataObj);
     }
-}
+};
 
    var createTaskEl = function(taskDataObj) {
     var listItemEl = document.createElement("li");
@@ -127,7 +127,7 @@ var editTask = function(taskId) {
     document.querySelector("select[name='task-type']").value = taskType;
     document.querySelector("#save-task").textContent = "Save Task";
     formEl.setAttribute("data-task-id",taskId);
-}
+};
 
 var deleteTask = function(taskId) {
     var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']"); 
@@ -193,11 +193,57 @@ var taskStatusChangeHandler = function (event) {
         tasks[i].status = statusValue;
         }
     }
+    saveTasks();
 
 };
 var saveTasks = function() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
-}
+};
+
+var loadTasks = function() {
+   var loaded_tasks = localStorage.getItem("tasks");
+    if(loaded_tasks === null)
+    {
+    tasks = [];
+    return false;
+    }
+    loaded_tasks = JSON.parse(loaded_tasks);
+    for(var i = 0; i < loaded_tasks.length; i++)
+    {
+        var taskDataObj = {
+            name: loaded_tasks[i].name,
+            type: loaded_tasks[i].type,
+            status: loaded_tasks[i].status
+        };
+        var listItemEl = document.createElement("li");
+        listItemEl.className = "task-item";
+
+        // add task id as a custom attribute
+        listItemEl.setAttribute("data-task-id", taskIdCounter);
+
+        var taskInfoEl = document.createElement("div");
+        taskInfoEl.className = "task-info";
+        taskInfoEl.innerHTML = "<h3 class='task-name'>" + taskDataObj.name + "</h3><span class='task-type'>" + taskDataObj.type + "</span>";
+        listItemEl.appendChild(taskInfoEl);
+        taskDataObj.id = taskIdCounter;
+        tasks.push(taskDataObj);
+        var taskActionsEl = createTaskActions(taskIdCounter);
+        listItemEl.appendChild(taskActionsEl);
+
+        if (taskDataObj.status === "to do") {
+            tasksToDoEl.appendChild(listItemEl);
+          } 
+          else if (taskDataObj.status === "in progress") {
+            tasksInProgressEl.appendChild(listItemEl);
+          } 
+          else if (taskDataObj.status === "completed") {
+            tasksCompletedEl.appendChild(listItemEl);
+          }
+          taskIdCounter++;
+    };
+    
+};
+loadTasks();
 formEl.addEventListener("submit", taskFormHandler);
 pageContentEl.addEventListener("click",taskButtonHandler);
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
